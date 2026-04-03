@@ -506,7 +506,8 @@ describe('Redis Streams Service', () => {
         mockRedis.exists.resolves(0);
         await admin.ensureTopicsExist(topics);
         expect(mockRedis.connect.calledOnce).to.be.true;
-        expect(mockRedis.xadd.callCount).to.equal(2);
+        // Each topic triggers xgroup CREATE + xgroup DESTROY = 2 calls per topic
+        expect(mockRedis.xgroup.callCount).to.equal(4);
         expect(mockRedis.quit.calledOnce).to.be.true;
       });
 

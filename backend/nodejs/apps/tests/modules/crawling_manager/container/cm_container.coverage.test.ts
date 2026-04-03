@@ -120,13 +120,13 @@ describe('CrawlingManagerContainer - coverage', () => {
   describe('dispose - additional coverage', () => {
     it('should close crawling worker when bound', async () => {
       const mockCrawlingWorker = { close: sinon.stub().resolves() }
-      const mockSyncEvents = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().resolves() }
+      const mockMessageProducer = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().resolves() }
       const mockKvStore = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().resolves() }
 
       const mockContainer = {
         isBound: sinon.stub().callsFake((key: any) => {
           if (typeof key === 'function') return true
-          if (key === 'SyncEventProducer') return true
+          if (key === 'MessageProducer') return true
           return false
         }),
         get: sinon.stub().callsFake((key: any) => {
@@ -134,7 +134,7 @@ describe('CrawlingManagerContainer - coverage', () => {
             if (key.name === 'CrawlingWorkerService') return mockCrawlingWorker
             if (key.name === 'KeyValueStoreService') return mockKvStore
           }
-          if (key === 'SyncEventProducer') return mockSyncEvents
+          if (key === 'MessageProducer') return mockMessageProducer
           return null
         }),
       }
@@ -143,7 +143,7 @@ describe('CrawlingManagerContainer - coverage', () => {
       await CrawlingManagerContainer.dispose()
 
       expect(mockCrawlingWorker.close.calledOnce).to.be.true
-      expect(mockSyncEvents.disconnect.calledOnce).to.be.true
+      expect(mockMessageProducer.disconnect.calledOnce).to.be.true
       expect(mockKvStore.disconnect.calledOnce).to.be.true
     })
 
@@ -167,13 +167,13 @@ describe('CrawlingManagerContainer - coverage', () => {
       expect(mockKvStore.disconnect.calledOnce).to.be.true
     })
 
-    it('should not disconnect SyncEventProducer when not connected', async () => {
-      const mockSyncEvents = { isConnected: sinon.stub().returns(false), disconnect: sinon.stub().resolves() }
+    it('should not disconnect MessageProducer when not connected', async () => {
+      const mockMessageProducer = { isConnected: sinon.stub().returns(false), disconnect: sinon.stub().resolves() }
 
       const mockContainer = {
-        isBound: sinon.stub().callsFake((key: any) => key === 'SyncEventProducer'),
+        isBound: sinon.stub().callsFake((key: any) => key === 'MessageProducer'),
         get: sinon.stub().callsFake((key: any) => {
-          if (key === 'SyncEventProducer') return mockSyncEvents
+          if (key === 'MessageProducer') return mockMessageProducer
           return null
         }),
       }
@@ -181,7 +181,7 @@ describe('CrawlingManagerContainer - coverage', () => {
       ;(CrawlingManagerContainer as any).instance = mockContainer
       await CrawlingManagerContainer.dispose()
 
-      expect(mockSyncEvents.disconnect.called).to.be.false
+      expect(mockMessageProducer.disconnect.called).to.be.false
     })
   })
 })

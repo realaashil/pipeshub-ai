@@ -138,13 +138,13 @@ describe('AuthServiceContainer - coverage', () => {
       expect(mockKvStore.disconnect.calledOnce).to.be.true
     })
 
-    it('should stop EntitiesEventProducer when connected', async () => {
-      const mockEntityEvents = { isConnected: sinon.stub().returns(true), stop: sinon.stub().resolves() }
+    it('should disconnect MessageProducer when connected', async () => {
+      const mockMessageProducer = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().resolves() }
 
       const mockContainer = {
-        isBound: sinon.stub().callsFake((key: string) => key === 'EntitiesEventProducer'),
+        isBound: sinon.stub().callsFake((key: string) => key === 'MessageProducer'),
         get: sinon.stub().callsFake((key: string) => {
-          if (key === 'EntitiesEventProducer') return mockEntityEvents
+          if (key === 'MessageProducer') return mockMessageProducer
           return null
         }),
       }
@@ -152,7 +152,7 @@ describe('AuthServiceContainer - coverage', () => {
       ;(AuthServiceContainer as any).instance = mockContainer
       await AuthServiceContainer.dispose()
 
-      expect(mockEntityEvents.stop.calledOnce).to.be.true
+      expect(mockMessageProducer.disconnect.calledOnce).to.be.true
     })
   })
 })

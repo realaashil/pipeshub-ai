@@ -121,18 +121,16 @@ describe('KnowledgeBaseContainer - coverage', () => {
   })
 
   describe('dispose - additional coverage', () => {
-    it('should stop RecordsEventProducer and SyncEventProducer', async () => {
-      const mockRecords = { stop: sinon.stub().resolves() }
-      const mockSync = { stop: sinon.stub().resolves() }
+    it('should disconnect MessageProducer and KeyValueStoreService', async () => {
+      const mockMessageProducer = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().resolves() }
       const mockKvStore = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().resolves() }
 
       const mockContainer = {
         isBound: sinon.stub().callsFake((key: string) =>
-          ['RecordsEventProducer', 'SyncEventProducer', 'KeyValueStoreService'].includes(key),
+          ['MessageProducer', 'KeyValueStoreService'].includes(key),
         ),
         get: sinon.stub().callsFake((key: string) => {
-          if (key === 'RecordsEventProducer') return mockRecords
-          if (key === 'SyncEventProducer') return mockSync
+          if (key === 'MessageProducer') return mockMessageProducer
           if (key === 'KeyValueStoreService') return mockKvStore
           return null
         }),
@@ -141,8 +139,7 @@ describe('KnowledgeBaseContainer - coverage', () => {
       ;(KnowledgeBaseContainer as any).instance = mockContainer
       await KnowledgeBaseContainer.dispose()
 
-      expect(mockRecords.stop.calledOnce).to.be.true
-      expect(mockSync.stop.calledOnce).to.be.true
+      expect(mockMessageProducer.disconnect.calledOnce).to.be.true
       expect(mockKvStore.disconnect.calledOnce).to.be.true
     })
 
@@ -164,11 +161,11 @@ describe('KnowledgeBaseContainer - coverage', () => {
     })
 
     it('should handle errors during disposal gracefully', async () => {
-      const mockRecords = { stop: sinon.stub().rejects(new Error('Stop failed')) }
+      const mockMessageProducer = { isConnected: sinon.stub().returns(true), disconnect: sinon.stub().rejects(new Error('Disconnect failed')) }
 
       const mockContainer = {
-        isBound: sinon.stub().callsFake((key: string) => key === 'RecordsEventProducer'),
-        get: sinon.stub().returns(mockRecords),
+        isBound: sinon.stub().callsFake((key: string) => key === 'MessageProducer'),
+        get: sinon.stub().returns(mockMessageProducer),
       }
 
       ;(KnowledgeBaseContainer as any).instance = mockContainer
