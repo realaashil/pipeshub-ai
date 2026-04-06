@@ -11,6 +11,15 @@ on:
         description: 'Connector markers to run (e.g. "s3", "gcs", "azure_blob", "azure_files", or "integration" for all)'
         required: true
         default: 'integration'
+        type: choice
+        options:
+          - integration
+          - s3
+          - gcs
+          - azure_blob
+          - azure_files
+          - messaging
+
       commit_hash:
         description: 'Commit hash to checkout (defaults to HEAD)'
         required: false
