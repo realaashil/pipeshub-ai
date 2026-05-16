@@ -1,5 +1,6 @@
 appId: com.pipeshub.desktop
 productName: PipesHub
+homepage: https://github.com/pipeshub-ai/pipeshub-ai
 icon: electron/out/logo/pipes-hub-1024.png
 directories:
   output: dist-electron
