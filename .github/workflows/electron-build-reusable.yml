@@ -14,28 +14,35 @@ permissions:
   contents: read
 
 jobs:
+  setup:
+    name: Resolve build matrix
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - name: Filter matrix by requested targets
+        id: gen
+        env:
+          TARGETS: ${{ inputs.targets }}
+        run: |
+          ALL='[
+            {"name":"macOS","os":"macos-latest","target":"mac","cache_path":"~/Library/Caches/electron"},
+            {"name":"Windows","os":"windows-latest","target":"win","cache_path":"~/AppData/Local/electron/Cache"},
+            {"name":"Linux","os":"ubuntu-latest","target":"linux","cache_path":"~/.cache/electron"}
+          ]'
+          MATRIX=$(jq -cn --argjson all "$ALL" --argjson t "$TARGETS" \
+            '{include: [$all[] | select(.target | IN($t[]))]}')
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
   build:
     name: ${{ matrix.name }}
-    if: contains(fromJSON(inputs.targets), matrix.target)
+    needs: setup
     runs-on: ${{ matrix.os }}
     timeout-minutes: 40
 
     strategy:
       fail-fast: false
-      matrix:
-        include:
-          - name: macOS
-            os: macos-latest
-            target: mac
-            cache_path: ~/Library/Caches/electron
-          - name: Windows
-            os: windows-latest
-            target: win
-            cache_path: ~/AppData/Local/electron/Cache
-          - name: Linux
-            os: ubuntu-latest
-            target: linux
-            cache_path: ~/.cache/electron
+      matrix: ${{ fromJSON(needs.setup.outputs.matrix) }}
 
     defaults:
       run:
