@@ -1,7 +1,7 @@
 name: Reusable Desktop Build
 
 # Builds the Electron desktop app on the native runners.
-# Called by electron-build.yml (tags/release) and electron-pr-build.yml (PRs).
+# Called by electron-build.yml (release publish) and electron-pr-build.yml (PRs).
 on:
   workflow_call:
     inputs:
